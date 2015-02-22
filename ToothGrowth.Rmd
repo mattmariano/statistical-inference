@@ -53,14 +53,16 @@ plot1=function(supp)
 ```
 # Confidence Tests for Paired Data
 # paired data
-```{r}
+```{r, echo=FALSE}
 oj1=d1[,c("dose1")]
 vc1=d2[,c("dose1")]
 
 difference <- oj1-vc1
 mn <- mean(difference); s <- sd(difference); n =10
 mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
-t.test(difference)
+t=t.test(difference)
+m=paste("Test 1 : mean difference=",mn, " , pvalue=",t$p.value);
+message(m);
 
 oj2=d1[,c("dose2")]
 vc2=d2[,c("dose2")]
@@ -68,7 +70,9 @@ vc2=d2[,c("dose2")]
 difference <- oj2-vc2
 mn <- mean(difference); s <- sd(difference); n =10
 mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
-t.test(difference)
+t= t.test(difference)
+m=paste("Test 2 : mean difference=",mn, " , pvalue=",t$p.value);
+message(m);
 
 oj3=d1[,c("dose3")]
 vc3=d2[,c("dose3")]
@@ -76,12 +80,14 @@ vc3=d2[,c("dose3")]
 difference <- oj3-vc3
 mn <- mean(difference); s <- sd(difference); n =10
 mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
-t.test(difference)
+t = t.test(difference)
+m=paste("Test 3 : mean difference=",mn, " , pvalue=",t$p.value);
+message(m);
 ```
 
 
 #Confidence Tests Unpaired
-```{r}
+```{r,echo=FALSE}
 message("COMPARISON OF DOSAGE FOR SUPPLEMENT OJ")
 
 message("first compare dose 2 to dose 1")
@@ -89,21 +95,24 @@ difference <- d1$dose2-d1$dose1
 mn <- mean(difference); s <- sd(difference); n =10
 message("Mean difference",mn)
 mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
-t.test(difference)
+t=t.test(difference)
+message("Test 1 : mean difference=",mn, " , pvalue=",t$p.value)
 
 message("second compare dose 3 to dose 1")
 difference <- d1$dose3-d1$dose1
 mn <- mean(difference); s <- sd(difference); n =10
 message("Mean difference",mn)
 mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
-t.test(difference)
+t= t.test(difference)
+message("Test 2 : mean difference=",mn, " , pvalue=",t$p.value)
 
 message("second compare dose 3 to dose 2")
 difference <- d1$dose3-d1$dose2
 mn <- mean(difference); s <- sd(difference); n =10
 message("Mean difference",mn)
 mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
-t.test(difference)
+t=t.test(difference)
+message("Test 3 : mean difference=",mn, " , pvalue=",t$p.value)
 message("--------------------------------------------------------------")
 message("COMPARISON OF DOSAGE FOR SUPPLEMENT VC")
 message("first compare dose 2 to dose 1")
