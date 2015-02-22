@@ -21,9 +21,11 @@ The CLT states that the mean of distribution just described has the mean of the 
 The Equation for the Normal or Guassian Distribution
 
 $$\frac{e^-((X-\mu)/(2 \sigma^2))}{\Bigl(\sigma\sqrt{2 \pi}\Bigr)}$$
+
 - X is a random variable
 - sigma is the standard deviation
 - mu is the mean
+
 $$f(x,\lambda) = \begin{cases}exp(-\lambda x) &  x \ge 0 \\ 0 & x < 0  \end{cases}$$
 
 - lambda is called the rate paramter.
@@ -54,10 +56,10 @@ psd=1/lambda
 The function getdist returns a matrix containing the simulation id , distribution of means and the distribution of standard deviations for our simulations.
 ```{r}
 getdist=function(){
-  dist=rexp(nosim*nsamples,rate=lambda)
-  v1=c(1:nosim)
-  v2=apply(matrix(data=dist,nrow=nosim),1,mean)
-  v3=apply(matrix(data=dist,nrow=nosim),1,sd)
+  dist=rexp(nosims*nsamples,rate=lambda)
+  v1=c(1:nosims)
+  v2=apply(matrix(data=dist,nrow=nosims),1,mean)
+  v3=apply(matrix(data=dist,nrow=nosims),1,sd)
   m=cbind(v1,v2,v3)
   dimnames(m)=list(c(),c("id","mean","sd"))
   m
@@ -83,8 +85,25 @@ pdiff2=abs(mm -  xmu)/(mm+xmu)*200
 message("percentage difference for mu=",pdiff2)
 ```
 
+Next define functions for collecting the mean of means  over many simulations and varying sample sizes.
 
-
+```{r}
+varyingDist1=function(n,start){
+  nseq=seq(start,by=1,length.out=n)
+  mmatrix=matrix(nrow = nosims, ncol=n)
+  nsamples1=start
+  nsamples2=nsamples1+n-1
+  v=vector(length=n)
+  for(nsamples in nsamples1:nsamples2){
+     dist=rexp(nosims*nsamples,rate=lambda)
+     v2=apply(matrix(data=dist,nrow=nosims),1,mean)
+     mm=mean(v2)
+     pdiff=abs(mm-xmu)/(mm+xmu)*200
+     v[nsamples-nsamples1+1]=pdiff
+  }
+  v
+}
+```
 Next define functions for drawing the plots which will appear in the appendix.
 Not the use of freq=F to gives a histogram of area 1 and allows us to easily overlay a normal distribution.
 ```{r}
@@ -105,7 +124,7 @@ plot2=function(){
   
   hist(nmeans,xlim=c(-1,1)*3,breaks=100,main="Normallized Distribution of Means",freq=F)
   xfit=seq(-3,3,length=nosims*nsamples)
-  yfit=1/sqrt(2*pi)*exp(-x^2/2)
+  yfit=1/sqrt(2*pi)*exp(-xfit^2/2)
   lines(x=xfit,y=yfit,type ="l",lwd = 1 ,col = "red")
   x=c(0,0)
   y=c(0,dnorm(0))
@@ -113,6 +132,31 @@ plot2=function(){
   x=c(-2,2)
   y=dnorm(x);
   lines(x=x,y=y,lwd=5,col="blue")
+}
+
+#
+# show that the sample stadndard deviation follows a sigma/sqrt(n)
+#
+# parm n - the number of samples sizes
+# start is the starting sample size
+plot3=function(n,start){
+  x=seq(start,by=1,length.out=n)
+  mmatrix=matrix(nrow = nosims, ncol=n)
+  nsamples1=start
+  nsamples2=nsamples1+n-1
+  v=vector(length=n)
+  for(nsamples in nsamples1:nsamples2){
+     dist=rexp(nosims*nsamples,rate=lambda)
+     v2=apply(matrix(data=dist,nrow=nosims),1,mean)
+     sd1=sd(v2)
+     sd2=psd/sqrt(nsamples)
+     v[nsamples-nsamples1+1]=sd1
+  }
+  number_samples=x
+  sigma_n=v
+  plot(number_samples,sigma_n)
+  y=psd/sqrt(x)
+  lines(x,y,lwd=5,col="blue")
 }
 ```
 
@@ -131,4 +175,11 @@ plot1()
 #Figure 2 The Normallized Distribution of Sample Means
 ```{r,echo=F}
 plot2()
+```
+
+#Figure 3 The Standard Deviation of the Mean by Number of Samples
+
+- the blue line is sigma/sqrt(n) where sigma is the original population standard deviation, 1/lambda=5. and n is the number of samples 
+```{r,echo=F}
+plot3(200,20)
 ```

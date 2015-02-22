@@ -1,0 +1,144 @@
+---
+title: "Analysis of Tooth Growth Data"
+author: "Matthew Mariano"
+date: "February 22, 2015"
+output: pdf_document
+---
+#Introduction
+The purpose of this report is to analyze the ToothGrowth data. In this analysis I will reform the data to make it workable, make some initial plots and finally apply some confidence intervals. Since this data consists of subjects on different supplements and differnt dosages, analysis may be done on both paired and nonpaired data. So for example I may consider the pair where each subject is on the same dose but the supplement changes.
+```{r}
+library(datasets)
+library(ggplot2)
+data(ToothGrowth)
+library(reshape2)
+```{r}
+
+```
+Look at the data. For conveience in this report I do a head, but in my analysis I opened the whole data set which is rather small.
+```{r}
+tg=ToothGrowth
+head(ToothGrowth)
+tg$dose = as.factor(tg$dose)
+```
+Notice that the data is for 10 subjects , their are two supplements (VC and OJ) and there are three dosages (.5, 1.0 and 2.0).
+I want to compare the effects of different supplements at each dosage. To do this I need to reshape the data. I will do this so that there will be three columns for dose (dose1 , dose2, dose3) and the length associated with each one will be in the respective column.
+
+
+- id a sequuence of id for each subject
+- tgnew = the reformed dataset
+- d1 = the data for the supplement OJ
+- d2 = the data for the supplement VC
+
+```{r}
+id = 1:10
+tgnew = cbind(id, tg)
+tgnew = dcast(tgnew, id + supp ~ dose, value.var = "len")
+names(tgnew)[3:5] = c("dose1", "dose2", "dose3")
+tgnew = tgnew[order(tgnew$supp),]
+d1=tgnew[tgnew[,c("supp")]=="OJ",]
+d2=tgnew[tgnew[,c("supp")]=="VC",]
+```
+
+# Define some functions for plotting
+```{r}
+plot1=function(supp)
+{
+  x=tgnew[,c("supp")]==supp
+  d1=tgnew[x,c("dose1","dose2","dose3")]
+  # note you need the mode here or else a dataframe is still returned by as.vector
+  c1=as.vector(cumsum(d1)[nrow(d1),],mode="numeric")
+  p1=barplot(c1, main=supp, 
+          xlab="dose(mg)",col=c("red","green","blue"))
+}
+```
+# Confidence Tests for Paired Data
+# paired data
+```{r,echo=FALSE}
+oj1=d1[,c("dose1")]
+vc1=d2[,c("dose1")]
+
+difference <- oj1-vc1
+mn <- mean(difference); s <- sd(difference); n =10
+mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
+t.test(difference)
+
+oj2=d1[,c("dose2")]
+vc2=d2[,c("dose2")]
+
+difference <- oj2-vc2
+mn <- mean(difference); s <- sd(difference); n =10
+mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
+t.test(difference)
+
+oj3=d1[,c("dose3")]
+vc3=d2[,c("dose3")]
+
+difference <- oj3-vc3
+mn <- mean(difference); s <- sd(difference); n =10
+mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
+t.test(difference)
+```
+
+
+#Confidence Tests Unpaired
+```{r,echo=FALSE}
+message("COMPARISON OF DOSAGE FOR SUPPLEMENT OJ")
+
+message("first compare dose 2 to dose 1")
+difference <- d1$dose2-d1$dose1
+mn <- mean(difference); s <- sd(difference); n =10
+message("Mean difference",mn)
+mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
+t.test(difference)
+
+message("second compare dose 3 to dose 1")
+difference <- d1$dose3-d1$dose1
+mn <- mean(difference); s <- sd(difference); n =10
+message("Mean difference",mn)
+mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
+t.test(difference)
+
+message("second compare dose 3 to dose 2")
+difference <- d1$dose3-d1$dose2
+mn <- mean(difference); s <- sd(difference); n =10
+message("Mean difference",mn)
+mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
+t.test(difference)
+message("--------------------------------------------------------------")
+message("COMPARISON OF DOSAGE FOR SUPPLEMENT VC")
+message("first compare dose 2 to dose 1")
+difference <- d2$dose2-d2$dose1
+mn <- mean(difference); s <- sd(difference); n =10
+message("Mean difference",mn)
+mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
+t.test(difference)
+
+message("second compare dose 3 to dose 1")
+difference <- d2$dose3-d2$dose1
+mn <- mean(difference); s <- sd(difference); n =10
+message("Mean difference",mn)
+mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
+t.test(difference)
+
+message("second compare dose 3 to dose 2")
+difference <- d2$dose3-d2$dose2
+mn <- mean(difference); s <- sd(difference); n =10
+message("Mean difference",mn)
+mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
+t.test(difference)
+```
+# Conclusion
+The paired confidence intervals indicate that we should reject the null hypothesis for the first two dosages.  To see that consider the mean of the differnce for each case and also consider the p value from the test. The first two tests have large means and small p values.
+In other words the delivery method, or supplement is important for tooth length when the dosage is .5 to 1.0 mg, however at 2.0 mg the delivery method does not determine the tooth length.
+
+For the unpaired tests, testing was done to see if the dosage for a particular supplement is statistically significant for tooth length.
+Here we see that all of the mean in difference is large. And also the p value from the test is very small.
+In this case the null hypothesis must be rejected for both supplements and all doses. In other words the dosage is statistically significant in determining tooth length for either VC or OJ. 
+
+#Appendix
+# Figure 1 Tooth Length versus Dosage for Supplement OJ
+```{r}
+plot1("OJ")
+# Figure 1 Tooth Length versus Dosage for Supplement OJ
+plot1("VC")
+```
